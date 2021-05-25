@@ -8,7 +8,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformer.util import clone
+from transformer.Util import clone
 import math
 
 

@@ -6,7 +6,7 @@
 @time: 2021/5/22 15:26
 """
 import torch.nn as nn
-from transformer.util import clone
+from transformer.Util import clone
 from transformer.Sublayers import MultiHeadedAttention, PositionwiseFeedForward, LayerNorm
 
 

@@ -7,7 +7,7 @@
 """
 import torch.nn as nn
 import torch.nn.functional as F
-from transformer.util import clone
+from transformer.Util import clone
 from transformer.Layers import EncoderLayer, DecoderLayer
 from transformer.Sublayers import LayerNorm
 

@@ -15,14 +15,14 @@ class Transformer(nn.Module):
     A sequence to sequence model with attention mechanism.
     """
 
-    def __init__(self, src_vocab, tgt_vocab, N=6,
+    def __init__(self, src_vocab_size, tgt_vocab_size, N=6,
                  d_model=512, d_ff=2048, h=8, dropout=0.1):
         super(Transformer, self).__init__()
-        self.src_embed = nn.Sequential(Embeddings(d_model, src_vocab), PositionalEncoding(d_model, dropout))
-        self.tgt_embed = nn.Sequential(Embeddings(d_model, tgt_vocab), PositionalEncoding(d_model, dropout))
+        self.src_embed = nn.Sequential(Embeddings(d_model, src_vocab_size), PositionalEncoding(d_model, dropout))
+        self.tgt_embed = nn.Sequential(Embeddings(d_model, tgt_vocab_size), PositionalEncoding(d_model, dropout))
         self.encoder = Encoder(h, d_model, d_ff, dropout, N)
         self.decoder = Decoder(h, d_model, d_ff, dropout, N)
-        self.generator = Generator(d_model, tgt_vocab)
+        self.generator = Generator(d_model, tgt_vocab_size)
 
         # Initialize parameters with Glorot / fan_avg.
         for p in self.parameters():
