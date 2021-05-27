@@ -15,13 +15,13 @@ class Transformer(nn.Module):
     A sequence to sequence model with attention mechanism.
     """
 
-    def __init__(self, src_vocab_size, tgt_vocab_size, N=6,
-                 d_model=512, d_ff=2048, h=8, dropout=0.1):
+    def __init__(self, src_vocab_size, tgt_vocab_size, n_layer=6,
+                 d_model=512, d_ff=2048, n_head=8, dropout=0.1):
         super(Transformer, self).__init__()
         self.src_embed = nn.Sequential(Embeddings(d_model, src_vocab_size), PositionalEncoding(d_model, dropout))
         self.tgt_embed = nn.Sequential(Embeddings(d_model, tgt_vocab_size), PositionalEncoding(d_model, dropout))
-        self.encoder = Encoder(h, d_model, d_ff, dropout, N)
-        self.decoder = Decoder(h, d_model, d_ff, dropout, N)
+        self.encoder = Encoder(n_head, d_model, d_ff, dropout, n_layer)
+        self.decoder = Decoder(n_head, d_model, d_ff, dropout, n_layer)
         self.generator = Generator(d_model, tgt_vocab_size)
 
         # Initialize parameters with Glorot / fan_avg.
@@ -33,8 +33,10 @@ class Transformer(nn.Module):
         """
         Take in and process masked src and target sequences.
         """
-        return self.decode(self.encode(src, src_mask), src_mask,
+        x = self.decode(self.encode(src, src_mask), src_mask,
                            tgt, tgt_mask)
+        x = self.generator(x)
+        return x
 
     def encode(self, src, src_mask):
         return self.encoder(self.src_embed(src), src_mask)
