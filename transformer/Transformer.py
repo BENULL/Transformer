@@ -35,7 +35,7 @@ class Transformer(nn.Module):
         """
         x = self.decode(self.encode(src, src_mask), src_mask,
                            tgt, tgt_mask)
-        x = self.generator(x)
+        # x = self.generator(x)
         return x
 
     def encode(self, src, src_mask):
