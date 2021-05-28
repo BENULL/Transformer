@@ -138,8 +138,8 @@ def run_epoch(model, training_data, optimizer, opt, device, smoothing, train_epo
     desc = '  - (Training)   ' if train_epoch else '  - (Testing)   '
     for batch in tqdm(training_data, mininterval=2, desc=desc, leave=False):
         # prepare data
-        tar_inp = batch.trg[:, :-1].to(device)
-        tar_real = batch.trg[:, 1:].to(device)
+        tar_inp = batch.trg[:, :-1]
+        tar_real = batch.trg[:, 1:]
         enc_padding_mask, combined_mask, dec_padding_mask = create_masks(batch.src, tar_inp)
         # forward
         optimizer.zero_grad()

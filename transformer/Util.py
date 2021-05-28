@@ -9,15 +9,19 @@ import torch
 import torch.nn as nn
 import copy
 from torch.autograd import Variable
-
+import numpy as np
 
 def subsequent_mask(size):
     """
     Mask out subsequent positions
     """
-    look_ahead_mask = (1 - torch.triu(
-        torch.ones((1, size, size)), diagonal=1)).bool()
-    return look_ahead_mask  # (size, size)
+    attn_shape = (1, size, size)
+    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    return torch.from_numpy(subsequent_mask) == 0
+
+    # look_ahead_mask = (1 - torch.triu(
+    #     torch.ones((1, size, size)), diagonal=1)).bool()
+    # return look_ahead_mask  # (size, size)
 
 
 def get_pad_mask(seq, pad_idx=0):
