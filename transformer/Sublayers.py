@@ -12,20 +12,23 @@ from transformer.Util import clone
 import math
 
 
-def scaledDotProductAttention(q, k, v, mask=None, dropout=None):
+class ScaledDotProductAttention(nn.Module):
     """
     Scaled Dot Product Attention
     """
-    d_k = q.size(-1)
-    scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(d_k)
-    if mask is not None:
-        scores = scores.masked_fill(mask == 0, -1e9)
-    p_attn = F.softmax(scores, dim=-1)
 
-    if dropout is not None:
-        p_attn = dropout(p_attn)
-    return torch.matmul(p_attn, v), p_attn
+    def __init__(self):
+        super(ScaledDotProductAttention, self).__init__()
 
+    def forward(self, q, k, v, mask=None, dropout=None):
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(k.size(-1))
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(scores, dim=-1)
+
+        if dropout is not None:
+            p_attn = dropout(p_attn)
+        return torch.matmul(p_attn, v), p_attn
 
 class MultiHeadedAttention(nn.Module):
     def __init__(self, h, d_model, dropout=0.1):
@@ -33,7 +36,7 @@ class MultiHeadedAttention(nn.Module):
         self.d_k = d_model // h
         self.h = h
         self.linears = clone(nn.Linear(d_model, d_model), 4)
-        self.attention = None
+        self.attention = ScaledDotProductAttention()
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, query, key, value, mask=None):
@@ -48,7 +51,7 @@ class MultiHeadedAttention(nn.Module):
                              for l, x in zip(self.linears, (query, key, value))]
 
         # 2) Apply attention on all the projected vectors in batch.
-        x, self.attention = scaledDotProductAttention(query, key, value, mask=mask,
+        x, _ = self.attention(query, key, value, mask=mask,
                                       dropout=self.dropout)
 
         # 3) "Concat" using a view and apply a final linear.
@@ -78,10 +81,10 @@ class LayerNorm(nn.Module):
     LayerNorm Module
     """
 
-    def __init__(self, normalized_shape, eps=1e-5):
+    def __init__(self, normalized_shape, eps=1e-6):
         super(LayerNorm, self).__init__()
         self.a_2 = nn.Parameter(torch.ones(normalized_shape))
-        self.b_2 = nn.Parameter(torch.ones(normalized_shape))
+        self.b_2 = nn.Parameter(torch.zeros(normalized_shape))
         self.eps = eps
 
     def forward(self, x):
